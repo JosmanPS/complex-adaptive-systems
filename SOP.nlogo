@@ -5,14 +5,15 @@
 ;; Jose Manuel Proudinat Silva
 
 
-turtles-own [ quality standing ]
-globals [ totalStanding neighStand ]
+turtles-own [ quality standing utility ]
+globals [ totalStanding neighStand i ]
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-to setup
+to sit-random
   
-  ;; Sentamos a las personas en el auditorio
+  ;; Sentamos a las personas en el auditorio 
+  ;; de manera aleatoria
   
   clear-all
   
@@ -24,6 +25,7 @@ to setup
     set shape "square"
     set quality random-float 1
     set standing 0
+    set utility 0
     if ( count turtles-here > 1)
       [ moves turtle who ]
   ]
@@ -43,6 +45,56 @@ to moves[turt]
     [ moves turt ]
 
 end
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to futility[turt]
+  
+  ;; Funcion que mide la utilidad dependiendo el lugar en
+  ;; que se siente
+  
+  set utility 0
+  
+  ;; Quiere estar cerca de otras personas
+  if ( count ( turtles in-radius 2 ) > 1 )[
+    set utility ( utility + 1 )
+  ]
+  
+  ;; No pegado a las personas
+  if ( count ( turtles-on neighbors4 ) = 0 )[
+    set utility ( utility + 1 )
+  ] 
+   
+end
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to sit[turt]
+  
+  ;; Funcion para que la tortuga busque sentarse en el
+  ;; lugar que maximiza su utilidad
+  
+  set i 0
+  
+  ;; Intentamos encontrar un lugar de utilidad 2
+  while [ i < 10 ][
+    if ( utility < 2 )
+      [ moves turt ]
+    set i ( i + 1 )
+  ]
+  
+  set i 0
+  
+  ;; Intentamos encontrar un lugar de utilidad 1
+  while [ i < 10 ][
+    if ( utility < 1 )
+      [ moves turt ]
+    set i ( i + 1 )
+  ]
+  
+end  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -72,7 +124,7 @@ to influence
   
   ;; Modificar a que solo cuenten los que estan delante
   
-  ask turtles[
+  ask turtles with [ color = blue ][
     set neighStand ( count ( turtles-on neighbors4 ) with [ standing = 1 ] )
     if (neighStand > (count ( turtles-on neighbors4 )) * porcInfluence)
       [ set standing 1
@@ -82,7 +134,6 @@ to influence
   
 end    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -114,10 +165,10 @@ ticks
 BUTTON
 21
 115
-87
+123
 148
 NIL
-setup
+sit-random
 NIL
 1
 T
@@ -186,7 +237,7 @@ porcInfluence
 porcInfluence
 0
 1
-0.5
+0.7
 0.05
 1
 NIL
